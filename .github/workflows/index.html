@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Project - ST</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background: linear-gradient(135deg, #eceff1, #ffffff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      flex-direction: column;
+      padding: 20px;
+    }
+
+    .title {
+      font-size: 2rem;
+      margin-bottom: 20px;
+      text-align: center;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .cards {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 30px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .card {
+      width: 140px;
+      height: 180px;
+      border-radius: 12px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      font-size: 1.4rem;
+      font-weight: bold;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s;
+      text-align: center;
+    }
+
+    .card:hover {
+      transform: scale(1.05);
+    }
+
+    .azul {
+      background-color: #1976d2;
+    }
+
+    .laranja {
+      background-color: #ef6c00;
+    }
+
+    .question-box {
+      display: none;
+      max-width: 500px;
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+      text-align: center;
+    }
+
+    .question {
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+    }
+
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .option-btn {
+      background-color: #eeeeee;
+      border: none;
+      padding: 10px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .option-btn:hover {
+      background-color: #ddd;
+    }
+
+    .bottom-buttons {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .resposta-btn, .fechar-btn {
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      color: white;
+    }
+
+    .resposta-btn {
+      background-color: #607d8b;
+    }
+
+    .fechar-btn {
+      background-color: crimson;
+    }
+
+    .timer {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .autor {
+      position: fixed;
+      bottom: 10px;
+      font-size: 0.85rem;
+      color: #888;
+      text-align: center;
+      width: 100%;
+    }
+
+    .correct {
+      background-color: #c8e6c9;
+    }
+
+    .incorrect {
+      background-color: #ffcdd2;
+    }
+
+    @media (max-width: 500px) {
+      .card {
+        width: 120px;
+        height: 150px;
+        font-size: 1.2rem;
+      }
+    }
+#dado-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 999;
+}
+
+#sortearBtn {
+  background: linear-gradient(135deg, #00c6ff, #0072ff);
+  color: white;
+  border: none;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+#sortearBtn:hover {
+  transform: scale(1.05);
+}
+
+#dado {
+  font-size: 2.5rem;
+  transition: transform 0.2s ease;
+}
+  </style>
+</head>
+<body>
+
+  <div class="title">Qual cartão você pegou?</div>
+  <div class="cards">
+    <div class="card azul" onclick="mostrarPergunta('azul')">Cartão Azul</div>
+    <div class="card laranja" onclick="mostrarPergunta('laranja')">Cartão Laranja</div>
+  </div>
+
+<div id="dado-container">
+  <div id="dado">🎲</div>
+  <button id="sortearBtn" onclick="sortearNumero()">Sortear número</button>
+</div>
+
+  <div class="question-box" id="questionBox">
+    <div class="question" id="perguntaTexto"></div>
+    <div class="options" id="opcoes"></div>
+    <div class="bottom-buttons">
+      <button class="resposta-btn" onclick="mostrarResposta()">Ver Resposta</button>
+      <div class="timer" id="timer">⏱️ 20</div>
+      <button class="fechar-btn" onclick="fecharPergunta()">✖</button>
+    </div>
+  </div>
+
+  <div class="autor">© Samuel Torres Ferreira - Todas as prerrogativas e direitos reservados.</div>
+
+  <script>
+    const perguntas = {
+      azul: [
+        { pergunta: "Em que século começaram as Grandes Navegações?", opcoes: ["Século XII", "Século XV", "Século XVIII", "Século XIV"], resposta: "Século XV" },
+        { pergunta: "Qual país iniciou as Grandes Navegações?", opcoes: ["Espanha", "França", "Portugal", "Inglaterra"], resposta: "Portugal" },
+        { pergunta: "Quem chegou à Índia em 1498?", opcoes: ["Cristóvão Colombo", "Vasco da Gama", "Fernão de Magalhães", "Bartolomeu Dias"], resposta: "Vasco da Gama" },
+        { pergunta: "Cristóvão Colombo chegou ao Brasil?", opcoes: ["Sim", "Não"], resposta: "Não" },
+        { pergunta: "O que os europeus buscavam nas viagens?", opcoes: ["Aventuras", "Alimentos", "Especiarias", "Escravidão"], resposta: "Especiarias" },
+        { pergunta: "Qual era o principal instrumento de navegação?", opcoes: ["Termômetro", "GPS", "Astrolábio", "Bússola"], resposta: "Astrolábio" },
+        { pergunta: "Nome do tratado que dividiu o mundo entre Portugal e Espanha:", opcoes: ["Tratado de Madri", "Tratado de Lisboa", "Tratado de Tordesilhas", "Tratado de Versalhes"], resposta: "Tratado de Tordesilhas" },
+        { pergunta: "As caravelas eram embarcações...", opcoes: ["Pequenas e lentas", "Largas e frágeis", "Ágeis e leves", "Submarinas"], resposta: "Ágeis e leves" },
+        { pergunta: "Qual país financiou Colombo?", opcoes: ["Itália", "França", "Inglaterra", "Espanha"], resposta: "Espanha" },
+        { pergunta: "Para que servia o astrolábio?", opcoes: ["Medir a profundidade do mar", "Indicar o Norte magnético", "Calcular a altura dos astros", "Navegar sob a água"], resposta: "Calcular a altura dos astros" },
+        { pergunta: "Quem deu a volta ao mundo pela 1ª vez?", opcoes: ["Vasco da Gama", "Colombo", "Fernão de Magalhães", "Cabral"], resposta: "Fernão de Magalhães" },
+        { pergunta: "O objetivo principal das Grandes Navegações era:", opcoes: ["Divertimento", "Comércio e expansão", "Exploração da Lua", "Pesca"], resposta: "Comércio e expansão" },
+        { pergunta: "Quem chegou à Índia?", opcoes: ["Bartolomeu Dias", "Cristóvão Colombo", "Pedro Álvares Cabral", "Vasco da Gama"], resposta: "Vasco da Gama" },
+        { pergunta: "O que era o monopólio comercial?", opcoes: ["Venda de produtos sem impostos", "Controle exclusivo do comércio", "Troca entre amigos", "Roubos no mar"], resposta: "Controle exclusivo do comércio" },
+        { pergunta: "Colombo atravessou qual oceano?", opcoes: ["Pacífico", "Índico", "Ártico", "Atlântico"], resposta: "Atlântico" },
+        { pergunta: "Rotas comerciais entre Europa e Oriente eram chamadas de:", opcoes: ["Rotas da seda", "Rotas de prata", "Trilhas de ouro", "Caminhos do vento"], resposta: "Rotas da seda" },
+        { pergunta: "Após as navegações, os europeus passaram a explorar:", opcoes: ["Apenas a Europa", "América, África e Ásia", "Apenas o Oriente Médio", "O Polo Sul"], resposta: "América, África e Ásia" },
+        { pergunta: "Quem chegou ao Brasil em 1500?", opcoes: ["Colombo", "Vasco da Gama", "Pedro Álvares Cabral", "Bartolomeu Dias"], resposta: "Pedro Álvares Cabral" },
+        { pergunta: "O que significava 'mar tenebroso'?", opcoes: ["Oceano conhecido", "Lugar de monstros e perigos", "Lago navegável", "Região calma"], resposta: "Lugar de monstros e perigos" },
+        { pergunta: "Os portugueses buscavam nas Índias:", opcoes: ["Café", "Especiarias", "Ouro", "Escravos"], resposta: "Especiarias" },
+        { pergunta: "As navegações aconteceram após:", opcoes: ["Idade Antiga", "Idade Média", "Idade Contemporânea", "Renascimento"], resposta: "Idade Média" },
+        { pergunta: "Onde fica a Península Ibérica?", opcoes: ["América do Sul", "África", "Ásia", "Europa"], resposta: "Europa" },
+        { pergunta: "Quem descobriu o caminho marítimo para as Índias?", opcoes: ["Colombo", "Vasco da Gama", "Cabral", "Magalhães"], resposta: "Vasco da Gama" },
+        { pergunta: "As navegações deram início à:", opcoes: ["Idade Antiga", "Idade Média", "Idade Moderna", "Idade do Bronze"], resposta: "Idade Moderna" }
+      ],
+      laranja: [
+        { pergunta: "Por que Portugal iniciou as Grandes Navegações?", opcoes: ["Por necessidade de colonizar", "Por estar em guerra", "Pela localização e interesse comercial", "Para fugir de invasões"], resposta: "Pela localização e interesse comercial" },
+        { pergunta: "Como o Renascimento influenciou as navegações?", opcoes: ["Com avanço da arte", "Com valorização do conhecimento e ciência", "Com guerras religiosas", "Com desvalorização da Igreja"], resposta: "Com valorização do conhecimento e ciência" },
+        { pergunta: "Mercantilismo defendia:", opcoes: ["Comércio livre", "Redução do ouro", "Acúmulo de riquezas e metais preciosos", "Trocas igualitárias"], resposta: "Acúmulo de riquezas e metais preciosos" },
+        { pergunta: "Motivações de Portugal e Espanha eram:", opcoes: ["Iguais em tudo", "Diferentes: Espanha queria guerra, Portugal queria paz", "Religiosas e econômicas", "Só políticas"], resposta: "Religiosas e econômicas" },
+        { pergunta: "Tratado de Tordesilhas dividia:", opcoes: ["Europa", "América do Sul e América do Norte", "Terras “descobertas” entre Portugal e Espanha", "Oceanos"], resposta: "Terras “descobertas” entre Portugal e Espanha" },
+        { pergunta: "Avanço da ciência ajudou as navegações com:", opcoes: ["Tecnologia de redes sociais", "Novas armas", "Novos mapas e instrumentos", "Máquinas a vapor"], resposta: "Novos mapas e instrumentos" },
+        { pergunta: "Bússola era usada para:", opcoes: ["Ver estrelas", "Calcular distância", "Indicar direção", "Controlar o navio"], resposta: "Indicar direção" },
+        { pergunta: "Impactos para os indígenas:", opcoes: ["Trocas culturais", "Colonização e violência", "Melhoria de vida", "Liberdade"], resposta: "Colonização e violência" },
+        { pergunta: "Expansão ultramarina foi:", opcoes: ["Viagem à Lua", "Conquista de terras além-mar", "Guerra na Europa", "Comércio interno"], resposta: "Conquista de terras além-mar" },
+        { pergunta: "Colônias serviam para:", opcoes: ["Exploração e envio de riquezas", "Abrigar refugiados", "Fugir de doenças", "Preservar a natureza"], resposta: "Exploração e envio de riquezas" },
+        { pergunta: "Economia mundial mudou com:", opcoes: ["Novos impostos", "Surgimento do capitalismo comercial", "Fim do comércio", "Trocas locais"], resposta: "Surgimento do capitalismo comercial" },
+        { pergunta: "A nau era diferente da caravela por ser:", opcoes: ["Menor", "Mais leve", "Maior e mais pesada", "Submersível"], resposta: "Maior e mais pesada" },
+        { pergunta: "Portugal fortaleceu o comércio europeu ao:", opcoes: ["Colonizar a África", "Descobrir a rota marítima para as Índias", "Iniciar guerras", "Criar moedas"], resposta: "Descobrir a rota marítima para as Índias" },
+        { pergunta: "Conquistas marítimas geraram:", opcoes: ["Paz mundial", "Mudança cultural e política", "Isolamento", "Fim das religiões"], resposta: "Mudança cultural e política" },
+        { pergunta: "A Igreja apoiava as navegações para:", opcoes: ["Enriquecer", "Evitar guerras", "Espalhar o cristianismo", "Fugir da Inquisição"], resposta: "Espalhar o cristianismo" },
+        { pergunta: "As navegações incentivaram a:", opcoes: ["Escravidão africana", "Liberdade dos povos", "Igualdade social", "Democracia"], resposta: "Escravidão africana" },
+        { pergunta: "Portugal foi favorecido porque:", opcoes: ["Era rico", "Tinha costas voltadas ao Atlântico", "Era isolado", "Era grande"], resposta: "Tinha costas voltadas ao Atlântico" },
+        { pergunta: "Feitorias eram:", opcoes: ["Fortificações comerciais", "Casas religiosas", "Prédios reais", "Plantas medicinais"], resposta: "Fortificações comerciais" },
+        { pergunta: "Rota de Vasco da Gama incluía:", opcoes: ["Atlântico, África e Índia", "Europa e América", "China e Japão", "Norte da África"], resposta: "Atlântico, África e Índia" }
+      ]
+    };
+
+    let timer;
+    let tempoRestante = 20;
+    let respostaCorreta = "";
+    const timerEl = document.getElementById("timer");
+
+    function mostrarPergunta(cor) {
+      const lista = perguntas[cor];
+      const sorteada = lista[Math.floor(Math.random() * lista.length)];
+
+      document.getElementById("perguntaTexto").innerText = sorteada.pergunta;
+      respostaCorreta = sorteada.resposta;
+
+      const opcoesDiv = document.getElementById("opcoes");
+      opcoesDiv.innerHTML = "";
+      sorteada.opcoes.forEach(opcao => {
+        const btn = document.createElement("button");
+        btn.innerText = opcao;
+        btn.className = "option-btn";
+        btn.onclick = () => verificarResposta(opcao);
+        opcoesDiv.appendChild(btn);
+      });
+
+      document.getElementById("questionBox").style.display = "block";
+      iniciarTimer();
+    }
+
+    function iniciarTimer() {
+      tempoRestante = 20;
+      timerEl.innerText = `⏱️ ${tempoRestante}`;
+      clearInterval(timer);
+      timer = setInterval(() => {
+        tempoRestante--;
+        timerEl.innerText = `⏱️ ${tempoRestante}`;
+        if (tempoRestante <= 0) {
+          clearInterval(timer);
+          mostrarFeedback(false);
+        }
+      }, 1000);
+    }
+
+    function verificarResposta(selecionada) {
+      const botoes = document.querySelectorAll(".option-btn");
+      botoes.forEach(btn => {
+        btn.disabled = true;
+        if (btn.innerText === respostaCorreta) {
+          btn.classList.add("correct");
+        }
+        if (btn.innerText === selecionada && btn.innerText !== respostaCorreta) {
+          btn.classList.add("incorrect");
+        }
+      });
+      clearInterval(timer);
+    }
+
+    function mostrarResposta() {
+      alert("Resposta correta: " + respostaCorreta);
+    }
+
+    function fecharPergunta() {
+      document.getElementById("questionBox").style.display = "none";
+      clearInterval(timer);
+    }
+function sortearNumero() {
+  const dado = document.getElementById("dado");
+  let contador = 0;
+  const intervalo = setInterval(() => {
+    const n = Math.floor(Math.random() * 6) + 1;
+    dado.innerText = n;
+    dado.style.transform = `rotate(${contador * 60}deg) scale(1.2)`;
+    contador++;
+    if (contador >= 10) {
+      clearInterval(intervalo);
+      dado.style.transform = "scale(1)";
+    }
+  }, 100);
+}
+
+  </script>
+</body>
+</html>
